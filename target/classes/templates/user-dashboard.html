@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard | Grand Horizon Hotel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .user-nav {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand-logo {
+            font-size: 1.5rem;
+            color: var(--primary);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .guest-welcome {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Top Navigation for User -->
+    <nav class="user-nav">
+        <a href="#" class="brand-logo">
+            <i class="bi bi-buildings-fill"></i>
+            Grand Horizon
+        </a>
+        <div class="d-flex align-items-center gap-4">
+            <span class="text-muted small"><i class="bi bi-person-fill"></i> <span
+                    th:text="${username}">User</span></span>
+            <form th:action="@{/logout}" method="post" class="m-0">
+                <button type="submit" class="btn btn-sm btn-outline-danger border-opacity-50 text-danger">
+                    <i class="bi bi-box-arrow-right"></i> Sign Out
+                </button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div th:if="${guest == null}" class="alert alert-warning glass-card">
+            <h4>Profile Not Found</h4>
+            <p>We couldn't find a guest profile associated with your email address (<span
+                    th:text="${username}"></span>).</p>
+            <p>Please contact the front desk to ensure your booking email matches your login email so we can display
+                your reservations.</p>
+        </div>
+
+        <div th:if="${guest != null}">
+            <!-- Welcome Header with Booking Option -->
+            <header class="mb-5 glass-card p-4 d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="guest-welcome">Welcome, <span th:text="${guest.name}">Guest</span></h1>
+                    <p class="text-muted lead mb-0">Manage your upcoming stays and billing details.</p>
+                </div>
+                <div>
+                    <a th:href="@{/user/book}" class="btn btn-premium d-flex align-items-center gap-2 px-4 py-3">
+                        <i class="bi bi-plus-circle-fill"></i> Book a New Room
+                    </a>
+                </div>
+            </header>
+
+            <!-- Reservations Section -->
+            <div class="row g-4 mb-5">
+                <div class="col-12">
+                    <h4 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                        <i class="bi bi-calendar-check text-primary"></i> My Reservations
+                    </h4>
+
+                    <div th:if="${#lists.isEmpty(reservations)}" class="glass-card text-center p-5">
+                        <i class="bi bi-journal-x text-muted fs-1 mb-3"></i>
+                        <h5 class="text-dark">No active reservations</h5>
+                        <p class="text-muted mb-0">You don't have any bookings with us yet. Contact the hotel to book
+                            your stay!</p>
+                    </div>
+
+                    <div th:each="res : ${reservations}"
+                        class="glass-card mb-4 shadow-premium position-relative overflow-hidden">
+
+                        <!-- Status Badge -->
+                        <div class="position-absolute top-0 end-0 p-3">
+                            <span class="badge"
+                                th:classappend="${res.bookingStatus.name() == 'CONFIRMED' ? 'bg-success' : (res.bookingStatus.name() == 'CANCELLED' ? 'bg-danger' : 'bg-warning')}"
+                                th:text="${res.bookingStatus}"></span>
+                        </div>
+
+                        <div class="row gx-5 gy-4">
+                            <!-- Left Col: Booking Details & Room -->
+                            <div class="col-md-7 border-md-end border-white border-opacity-10">
+                                <h5 class="text-primary fw-bold mb-4">Folio #<span
+                                        th:text="${res.reservationId}"></span></h5>
+
+                                <div class="d-flex gap-4 mb-4">
+                                    <div>
+                                        <p class="text-muted smaller mb-1 text-uppercase">Check-In</p>
+                                        <div class="fw-bold fs-5" th:text="${res.checkInDate}"></div>
+                                    </div>
+                                    <div class="align-self-center text-muted"><i class="bi bi-arrow-right"></i></div>
+                                    <div>
+                                        <p class="text-muted smaller mb-1 text-uppercase">Check-Out</p>
+                                        <div class="fw-bold fs-5" th:text="${res.checkOutDate}"></div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex align-items-center gap-3 bg-primary bg-opacity-10 p-3 rounded-3"
+                                    style="border: 1px solid rgba(79, 70, 229, 0.2)">
+                                    <div class="stat-icon bg-primary bg-opacity-20 text-primary"
+                                        style="width: 48px; height: 48px; min-width: 48px;">
+                                        <i class="bi bi-door-closed"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold"
+                                            th:text="${res.room != null ? res.room.roomType + ' Room' : 'Unassigned'}">
+                                        </h6>
+                                        <div class="text-muted small">
+                                            Room <span class="fw-bold text-main"
+                                                th:text="${res.room != null ? res.room.roomNumber : 'TBD'}"></span>
+                                        </div>
+                                    </div>
+                                    <div class="ms-auto text-end" th:if="${res.room != null}">
+                                        <div class="text-primary fw-bold"
+                                            th:text="'₹' + ${#numbers.formatDecimal(res.room.pricePerNight, 1, 'COMMA', 0, 'POINT')}">
+                                        </div>
+                                        <div class="smaller text-muted">per night</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right Col: Payments & Pricing -->
+                            <div class="col-md-5 d-flex flex-column justify-content-center">
+                                <h6 class="text-muted text-uppercase smaller mb-3 fw-bold">Billing Summary</h6>
+
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-dark">Total Stay Cost</span>
+                                    <span class="fw-bold text-dark fs-5"
+                                        th:text="'₹' + ${#numbers.formatDecimal(res.safeTotalAmount, 1, 'COMMA', 0, 'POINT')}"></span>
+                                </div>
+                                <div
+                                    class="d-flex justify-content-between mb-3 border-bottom border-white border-opacity-10 pb-3">
+                                    <span class="text-muted">Remaining Balance</span>
+                                    <span class="fw-bold"
+                                        th:classappend="${res.balance > 0 ? 'text-warning' : 'text-success'}"
+                                        th:text="${res.balance > 0 ? '₹' + #numbers.formatDecimal(res.balance, 1, 'COMMA', 0, 'POINT') : 'Settled'}"></span>
+                                </div>
+
+                                <div th:if="${not #lists.isEmpty(res.payments)}">
+                                    <p class="text-muted smaller mb-2">Payment History</p>
+                                    <div th:each="payment : ${res.payments}"
+                                        class="d-flex justify-content-between align-items-center mb-2 px-3 py-2 bg-dark rounded-2"
+                                        style="background: rgba(0,0,0,0.2) !important;">
+                                        <div>
+                                            <div class="small text-dark" th:text="${payment.paymentMethod}"></div>
+                                            <div class="smaller text-muted"
+                                                th:text="${#temporals.format(payment.paymentDate, 'dd MMM yyyy')}">
+                                            </div>
+                                        </div>
+                                        <div class="text-success fw-bold small"
+                                            th:text="'-₹' + ${#numbers.formatDecimal(payment.amount, 1, 'COMMA', 0, 'POINT')}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div th:if="${#lists.isEmpty(res.payments)}"
+                                    class="text-center text-muted small py-2 bg-dark rounded-2"
+                                    style="background: rgba(0,0,0,0.2) !important;">
+                                    No payments recorded yet.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+
+</html>

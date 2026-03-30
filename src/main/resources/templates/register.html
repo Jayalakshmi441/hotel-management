@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join Grand Horizon | Create Account</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        body {
+            background: #f8fafc;
+            background-image:
+                radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(124, 58, 237, 0.05) 0px, transparent 50%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .register-card {
+            width: 100%;
+            max-width: 550px;
+            padding: 3rem;
+            animation: fadeIn 0.8s ease-out;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="register-card text-center">
+        <div class="mb-5">
+            <div class="display-6 text-primary mb-3">
+                <i class="bi bi-person-plus-fill"></i>
+            </div>
+            <h2 class="fw-bold mb-1 text-dark">Create Your Account</h2>
+            <p class="text-muted">Start your journey at Grand Horizon</p>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger px-3 py-2 small mb-4">
+            <i class="bi bi-exclamation-circle me-1"></i> <span th:text="${error}"></span>
+        </div>
+
+        <form th:action="@{/register}" method="post" class="text-start">
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="form-label small text-muted ms-1">Full Name</label>
+                    <input type="text" name="name" class="glass-input form-control" placeholder="John Doe" required>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label small text-muted ms-1">Email Address</label>
+                    <input type="email" name="email" class="glass-input form-control" placeholder="john@example.com"
+                        required>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label small text-muted ms-1">Phone Number</label>
+                    <input type="text" name="phone" class="glass-input form-control"
+                        placeholder="10-digit mobile number" required maxlength="10" minlength="10" pattern="[0-9]{10}"
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                </div>
+
+                <div class="col-12 mb-4">
+                    <label class="form-label small text-muted ms-1">Password</label>
+                    <input type="password" name="password" class="glass-input form-control"
+                        placeholder="Create a strong password" maxlength="10" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-premium w-100 py-3 shadow-lg">
+                <i class="bi bi-check-circle me-1"></i> Join Now
+            </button>
+
+            <div class="mt-4 text-center">
+                <p class="text-muted small">Already have an account?
+                    <a th:href="@{/login}"
+                        class="text-primary fw-bold text-decoration-none border-bottom border-primary border-opacity-25 pb-1">Sign
+                        In</a>
+                </p>
+            </div>
+        </form>
+
+        <div class="mt-5 pt-3 border-top border-light">
+            <p class="text-muted smaller mb-0">Secure SSL Encrypted Registration</p>
+        </div>
+    </div>
+</body>
+
+</html>

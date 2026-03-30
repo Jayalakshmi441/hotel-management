@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guest Registry | Grand Horizon Hotel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <i class="bi bi-buildings-fill"></i>
+            <span>Grand Horizon</span>
+        </div>
+        <nav class="nav flex-column">
+            <a class="nav-link" th:href="@{/dashboard}"><i class="bi bi-grid-fill"></i> Dashboard</a>
+            <a class="nav-link active" th:href="@{/guests}"><i class="bi bi-people-fill"></i> Guests</a>
+            <a class="nav-link" th:href="@{/rooms}"><i class="bi bi-door-closed-fill"></i> Rooms</a>
+            <a class="nav-link" th:href="@{/reservations}"><i class="bi bi-calendar-check-fill"></i> Reservations</a>
+            <a class="nav-link" th:href="@{/reports}"><i class="bi bi-bar-chart-fill"></i> Reports</a>
+            <a class="nav-link" th:href="@{/staff}"><i class="bi bi-person-badge-fill"></i> Staff</a>
+        </nav>
+        <div style="position: absolute; bottom: 30px; width: calc(var(--sidebar-width) - 3rem);">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="nav-link border-0 bg-transparent w-100 text-danger">
+                    <i class="bi bi-box-arrow-right"></i> Sign Out
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <header class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h1 class="h2 fw-bold mb-1">Guest Registry</h1>
+                <p class="text-muted mb-0">Managing our portfolio of distinguished guests.</p>
+            </div>
+            <a th:href="@{/guests/new}" class="btn btn-premium d-flex align-items-center gap-2">
+                <i class="bi bi-person-plus-fill"></i> Register Guest
+            </a>
+        </header>
+        
+        <div th:if="${success}" class="alert alert-success glass-card border-success text-success d-flex align-items-center gap-3 mb-4">
+            <i class="bi bi-check-circle-fill fs-4"></i>
+            <div th:text="${success}">Success message</div>
+        </div>
+
+        <div th:if="${errorMessage}" class="alert alert-danger glass-card border-danger text-danger d-flex align-items-center gap-3 mb-4">
+            <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+            <div th:text="${errorMessage}">Error message</div>
+        </div>
+
+        <div class="glass-card p-0 overflow-hidden shadow-premium">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light border-bottom">
+                        <tr>
+                            <th class="ps-4">Guest Profile</th>
+                            <th>Contact Connectivity</th>
+                            <th>Verification</th>
+                            <th>Current Address</th>
+                            <th class="text-end pe-4">Manage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="guest : ${guests}">
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="avatar-ui avatar-primary">
+                                        <span th:text="${#strings.substring(guest.name, 0, 1)}">G</span>
+                                    </div>
+                                    <div>
+                                        <div th:text="${guest.name}" class="fw-bold text-main"></div>
+                                        <div class="smaller text-muted" th:text="'GUEST-ID: ' + ${guest.guestId}"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <div class="small fw-medium text-main">
+                                        <i class="bi bi-telephone text-primary me-2"></i>
+                                        <span th:text="${guest.phone}"></span>
+                                    </div>
+                                    <div class="smaller text-muted">
+                                        <i class="bi bi-envelope me-2"></i>
+                                        <span th:text="${guest.email}"></span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge badge-warning" th:text="${guest.idProof}">ID Proof</span>
+                            </td>
+                            <td>
+                                <div class="smaller text-muted"
+                                    style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                                    th:text="${guest.address}" th:title="${guest.address}">Address Line</div>
+                            </td>
+                            <td class="pe-4">
+                                <div class="d-flex gap-3 justify-content-end" style="position: relative; z-index: 50;">
+                                    <a th:href="@{'/guests/edit-profile/' + ${guest.guestId}}"
+                                        class="btn btn-primary shadow-sm"
+                                        style="width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 10px;">
+                                        <i class="bi bi-pencil-square"
+                                            style="pointer-events: none; font-size: 1.2rem;"></i>
+                                    </a>
+                                    <form th:action="@{'/guests/delete-profile/' + ${guest.guestId}}" method="post"
+                                        onsubmit="return confirm('Note: Deleting guest records is permanent. Continue?')">
+                                        <button type="submit" class="btn btn-danger shadow-sm"
+                                            style="width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 10px;">
+                                            <i class="bi bi-trash3" style="font-size: 1.2rem;"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(guests)}">
+                            <td colspan="5" class="text-center py-5">
+                                <i class="bi bi-people text-muted fs-1 mb-3 d-block"></i>
+                                <h6 class="text-muted">No guest records found in the registry.</h6>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div
+            class="mt-5 glass-card bg-primary bg-opacity-10 border-primary border-opacity-10 d-flex align-items-center gap-3">
+            <div class="avatar-ui avatar-primary" style="width: 48px; height: 48px; font-size: 1.4rem;">
+                <i class="bi bi-shield-check"></i>
+            </div>
+            <div>
+                <h6 class="mb-0 fw-bold text-primary">Secure Guest Management</h6>
+                <p class="mb-0 smaller text-muted">All guest data is protected under Grand Horizon's premium hospitality
+                    encryption standards.</p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

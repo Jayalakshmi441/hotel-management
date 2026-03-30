@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Reservation | Grand Horizon Hotel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <i class="bi bi-buildings-fill"></i>
+            <span>Grand Horizon</span>
+        </div>
+        <nav class="nav flex-column">
+            <a class="nav-link" th:href="@{/dashboard}"><i class="bi bi-grid-fill"></i> Dashboard</a>
+            <a class="nav-link" th:href="@{/guests}"><i class="bi bi-people-fill"></i> Guests</a>
+            <a class="nav-link" th:href="@{/rooms}"><i class="bi bi-door-closed-fill"></i> Rooms</a>
+            <a class="nav-link active" th:href="@{/reservations}"><i class="bi bi-calendar-check-fill"></i>
+                Reservations</a>
+            <a class="nav-link" th:href="@{/reports}"><i class="bi bi-bar-chart-fill"></i> Reports</a>
+            <a class="nav-link" th:href="@{/staff}"><i class="bi bi-person-badge-fill"></i> Staff</a>
+        </nav>
+        <div style="position: absolute; bottom: 30px; width: calc(var(--sidebar-width) - 3rem);">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="nav-link border-0 bg-transparent w-100 text-danger">
+                    <i class="bi bi-box-arrow-right"></i> Sign Out
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div style="max-width: 800px; margin: 0 auto;" class="form-container">
+            <header class="mb-5">
+                <a th:href="@{/reservations}"
+                    class="btn btn-sm text-primary text-decoration-none p-0 mb-3 d-inline-flex align-items-center gap-2">
+                    <i class="bi bi-arrow-left"></i> Back to Booking Management
+                </a>
+                <h1 class="h2 fw-bold mb-1"
+                    th:text="${reservation.reservationId == null ? 'Establish Reservation' : 'Modify Existing Reservation'}">
+                    Establish Reservation</h1>
+                <p class="text-muted mb-0"
+                    th:text="${reservation.reservationId == null ? 'Secure a premium stay experience for our distinguished guests.' : 'Adjust scheduling and accommodation details for this registered folio.'}">
+                    Secure a premium stay experience for our distinguished guests.</p>
+            </header>
+
+            <!-- Alerts for Validation -->
+            <div th:if="${error}" class="alert alert-danger glass-card border-danger border-opacity-20 mb-4 py-3">
+                <i class="bi bi-exclamation-octagon-fill me-2"></i> <span th:text="${error}"></span>
+            </div>
+            <div th:if="${success}" class="alert alert-success glass-card border-success border-opacity-20 mb-4 py-3">
+                <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${success}"></span>
+            </div>
+
+            <div class="glass-card shadow-premium p-4 p-md-5">
+                <form th:action="@{/reservations/save}" th:object="${reservation}" method="post"
+                    onsubmit="return validateDates()">
+                    <input type="hidden" th:field="*{reservationId}">
+                    <div class="row g-4">
+                        <div class="col-md-12">
+                            <label class="form-label">Search Guest Portfolio</label>
+                            <div class="position-relative">
+                                <i class="bi bi-person-check position-absolute text-primary"
+                                    style="left: 18px; top: 12px; font-size: 1.2rem;"></i>
+                                <select th:field="*{guest.guestId}" class="form-select ps-5 py-3" required>
+                                    <option value="" disabled selected>-- Select Member profile --</option>
+                                    <option th:each="g : ${guests}" th:value="${g.guestId}"
+                                        th:text="${g.name + ' (' + g.phone + ')'}"></option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label">Available Accommodation Units</label>
+                            <div class="position-relative">
+                                <i class="bi bi-door-closed position-absolute text-primary"
+                                    style="left: 18px; top: 12px; font-size: 1.2rem;"></i>
+                                <select th:field="*{room.roomId}" class="form-select ps-5 py-3" required>
+                                    <option value="" disabled selected>-- Assign Suite --</option>
+                                    <option th:each="rm : ${rooms}" th:value="${rm.roomId}"
+                                        th:text="${rm.roomNumber + ' - ' + rm.roomType + ' (₹' + rm.pricePerNight + ')'}">
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Check-In Arrival</label>
+                            <div class="position-relative">
+                                <i class="bi bi-calendar-check position-absolute text-primary"
+                                    style="left: 18px; top: 12px; font-size: 1.2rem;"></i>
+                                <input type="date" th:field="*{checkInDate}" class="form-control ps-5 py-3" required>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Check-Out Departure</label>
+                            <div class="position-relative">
+                                <i class="bi bi-calendar-x position-absolute text-primary"
+                                    style="left: 18px; top: 12px; font-size: 1.2rem;"></i>
+                                <input type="date" th:field="*{checkOutDate}" class="form-control ps-5 py-3" required>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label">Initial Booking Status</label>
+                            <div class="position-relative">
+                                <i class="bi bi-info-circle position-absolute text-primary"
+                                    style="left: 18px; top: 12px; font-size: 1.2rem;"></i>
+                                <select th:field="*{bookingStatus}" class="form-select ps-5 py-3" required>
+                                    <option th:each="st : ${statuses}" th:value="${st}" th:text="${st}"></option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 mt-5">
+                            <div class="d-flex gap-3">
+                                <button type="submit" class="btn btn-premium px-5 py-3">
+                                    <i class="bi bi-check-circle me-2"></i> Confirm Booking
+                                </button>
+                                <a th:href="@{/reservations}" class="btn btn-light px-4 py-3 border-radius-12"
+                                    style="border-radius: 12px; border: 1px solid #e2e8f0;">
+                                    <i class="bi bi-x-circle me-2 text-muted"></i> Discard
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script th:inline="javascript">
+        // Set dynamic min dates
+        const checkIn = document.getElementById('checkInDate');
+        const checkOut = document.getElementById('checkOutDate');
+
+        // Today as min for check-in
+        const today = new Date().toISOString().split('T')[0];
+        checkIn.setAttribute('min', today);
+
+        checkIn.addEventListener('change', () => {
+            if (checkIn.value) {
+                // Check-out must be at least check-in + 1 day
+                let minDate = new Date(checkIn.value);
+                minDate.setDate(minDate.getDate() + 1);
+                checkOut.setAttribute('min', minDate.toISOString().split('T')[0]);
+                if (checkOut.value && checkOut.value <= checkIn.value) {
+                    checkOut.value = minDate.toISOString().split('T')[0];
+                }
+            }
+        });
+
+        function validateDates() {
+            const inDate = new Date(document.getElementById('checkInDate').value);
+            const outDate = new Date(document.getElementById('checkOutDate').value);
+
+            if (outDate <= inDate) {
+                alert("Check-out date must be after Check-in date.");
+                return false;
+            }
+            return true;
+        }
+    </script>
+</body>
+
+</html>

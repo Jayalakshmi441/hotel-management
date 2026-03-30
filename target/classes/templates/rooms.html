@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room Inventory | Grand Horizon Hotel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .room-icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            transition: all 0.3s ease;
+        }
+
+        .status-pill {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-pill::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-available {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+        }
+
+        .status-available::before {
+            background: #22c55e;
+            box-shadow: 0 0 8px #22c55e;
+        }
+
+        .status-occupied {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .status-occupied::before {
+            background: #ef4444;
+            box-shadow: 0 0 8px #ef4444;
+        }
+
+        .status-maintenance {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+
+        .status-maintenance::before {
+            background: #f59e0b;
+            box-shadow: 0 0 8px #f59e0b;
+        }
+
+        .price-tag {
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <i class="bi bi-buildings-fill"></i>
+            <span>Grand Horizon</span>
+        </div>
+        <nav class="nav flex-column">
+            <a class="nav-link" th:href="@{/dashboard}"><i class="bi bi-grid-fill"></i> Dashboard</a>
+            <a class="nav-link" th:href="@{/guests}"><i class="bi bi-people-fill"></i> Guests</a>
+            <a class="nav-link active" th:href="@{/rooms}"><i class="bi bi-door-closed-fill"></i> Rooms</a>
+            <a class="nav-link" th:href="@{/reservations}"><i class="bi bi-calendar-check-fill"></i> Reservations</a>
+            <a class="nav-link" th:href="@{/reports}"><i class="bi bi-bar-chart-fill"></i> Reports</a>
+            <a class="nav-link" th:href="@{/staff}"><i class="bi bi-person-badge-fill"></i> Staff</a>
+        </nav>
+        <div style="position: absolute; bottom: 30px; width: calc(var(--sidebar-width) - 3rem);">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="nav-link border-0 bg-transparent w-100 text-danger">
+                    <i class="bi bi-box-arrow-right"></i> Sign Out
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <header class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h1 class="h2 fw-bold mb-1">Accommodation Assets</h1>
+                <p class="text-muted mb-0">Portfolio management of our luxury residential units.</p>
+            </div>
+            <a th:href="@{/rooms/new}" class="btn btn-premium d-flex align-items-center gap-2">
+                <i class="bi bi-plus-square-fill"></i> Add Luxury Unit
+            </a>
+        </header>
+
+        <div class="glass-card p-0 overflow-hidden shadow-premium">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light border-bottom">
+                        <tr>
+                            <th class="ps-4">Unit Identity</th>
+                            <th>Classification</th>
+                            <th>Operational Status</th>
+                            <th>Standard Rate</th>
+                            <th class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="room : ${rooms}">
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="room-icon-box bg-primary bg-opacity-10 text-primary">
+                                        <i class="bi bi-door-closed"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-main fs-5" th:text="'Suite ' + ${room.roomNumber}">
+                                        </div>
+                                        <div class="small text-muted">ID: #<span th:text="${room.roomId}"></span></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-main border border-glass px-3 py-2"
+                                    style="border-radius: 8px; font-weight: 500;" th:text="${room.roomType}"></span>
+                            </td>
+                            <td>
+                                <span class="status-pill"
+                                    th:classappend="${room.status.name() == 'Available' ? 'status-available' : (room.status.name() == 'Occupied' ? 'status-occupied' : 'status-maintenance')}"
+                                    th:text="${room.status}"></span>
+                            </td>
+                            <td>
+                                <div class="price-tag"
+                                    th:text="${'₹' + #numbers.formatDecimal(room.pricePerNight, 1, 'COMMA', 0, 'POINT')}">
+                                </div>
+                                <div class="small text-muted">per night</div>
+                            </td>
+                            <td class="pe-4">
+                                <div class="d-flex gap-3 justify-content-end" style="position: relative; z-index: 50;">
+                                    <a th:href="@{'/rooms/edit-unit/' + ${room.roomId}}"
+                                        class="btn btn-primary shadow-sm"
+                                        style="width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 10px;">
+                                        <i class="bi bi-pencil-square"
+                                            style="pointer-events: none; font-size: 1.2rem;"></i>
+                                    </a>
+                                    <form th:action="@{'/rooms/delete-unit/' + ${room.roomId}}" method="post"
+                                        onsubmit="return confirm('Note: Removing luxury units is permanent. Continue?')">
+                                        <button type="submit" class="btn btn-danger shadow-sm"
+                                            style="width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 10px;">
+                                            <i class="bi bi-trash3" style="font-size: 1.2rem;"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(rooms)}">
+                            <td colspan="5" class="text-center py-5">
+                                <i class="bi bi-building-exclamation text-muted fs-1 mb-3 d-block"></i>
+                                <p class="text-muted mb-0">No accommodation units registered in the inventory.</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="mt-4 row g-3">
+            <div class="col-md-4">
+                <div class="glass-card shadow-premium p-3 d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-success bg-opacity-10 p-2">
+                        <i class="bi bi-check-circle-fill text-success"></i>
+                    </div>
+                    <div>
+                        <div class="small text-muted">Ready for Check-in</div>
+                        <div class="fw-bold">High Availability</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="glass-card shadow-premium p-3 d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-primary bg-opacity-10 p-2">
+                        <i class="bi bi-stars text-primary"></i>
+                    </div>
+                    <div>
+                        <div class="small text-muted">Service Standard</div>
+                        <div class="fw-bold">Premium Quality</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="glass-card shadow-premium p-3 d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-info bg-opacity-10 p-2">
+                        <i class="bi bi-shield-check text-info"></i>
+                    </div>
+                    <div>
+                        <div class="small text-muted">Unit Safety</div>
+                        <div class="fw-bold">Fully Insured</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personnel Registry | Grand Horizon Hotel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <i class="bi bi-buildings-fill"></i>
+            <span>Grand Horizon</span>
+        </div>
+        <nav class="nav flex-column">
+            <a class="nav-link" th:href="@{/dashboard}"><i class="bi bi-grid-fill"></i> Dashboard</a>
+            <a class="nav-link" th:href="@{/guests}"><i class="bi bi-people-fill"></i> Guests</a>
+            <a class="nav-link" th:href="@{/rooms}"><i class="bi bi-door-closed-fill"></i> Rooms</a>
+            <a class="nav-link" th:href="@{/reservations}"><i class="bi bi-calendar-check-fill"></i> Reservations</a>
+            <a class="nav-link" th:href="@{/reports}"><i class="bi bi-bar-chart-fill"></i> Reports</a>
+            <a class="nav-link active" th:href="@{/staff}"><i class="bi bi-person-badge-fill"></i> Staff</a>
+        </nav>
+        <div style="position: absolute; bottom: 30px; width: calc(var(--sidebar-width) - 3rem);">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="nav-link border-0 bg-transparent w-100 text-danger">
+                    <i class="bi bi-box-arrow-right"></i> Sign Out
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <header class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h1 class="h2 fw-bold mb-1">Personnel Registry</h1>
+                <p class="text-muted mb-0">Overseeing our elite hospitality workforce and leadership.</p>
+            </div>
+            <a th:href="@{/staff/new}" class="btn btn-premium d-flex align-items-center gap-2">
+                <i class="bi bi-person-plus-fill"></i> Hire Personnel
+            </a>
+        </header>
+
+        <div class="glass-card p-0 overflow-hidden shadow-premium">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light border-bottom">
+                        <tr>
+                            <th class="ps-4">Personnel Profile</th>
+                            <th>Professional Role</th>
+                            <th>Direct Connection</th>
+                            <th>Monthly Stipend</th>
+                            <th class="text-end pe-4">Manage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="staff : ${staffList}">
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="avatar-ui avatar-dark">
+                                        <span th:text="${#strings.substring(staff.name, 0, 1)}">S</span>
+                                    </div>
+                                    <div>
+                                        <div th:text="${staff.name}" class="fw-bold text-main">Staff Name</div>
+                                        <div class="smaller text-muted" th:text="'TEAM-REF: ' + ${staff.staffId}">ID
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle"
+                                    th:text="${staff.role}">Role</span>
+                            </td>
+                            <td>
+                                <div class="small fw-medium text-main">
+                                    <i class="bi bi-telephone text-primary me-2"></i>
+                                    <span th:text="${staff.phone}">Phone</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-success bg-opacity-10 text-success border border-success-subtle fw-bold"
+                                    style="font-size: 0.85rem;">
+                                    <i class="bi bi-currency-rupee"></i>
+                                    <span
+                                        th:text="${#numbers.formatDecimal(staff.salary, 1, 'COMMA', 0, 'POINT')}">Salary</span>
+                                </div>
+                            </td>
+                            <td class="pe-4">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <a th:href="@{/staff/edit/{id}(id=${staff.staffId})}"
+                                        class="btn btn-sm btn-outline-primary shadow-sm" title="Edit Profile"
+                                        style="border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <form th:action="@{/staff/delete/{id}(id=${staff.staffId})}" method="post"
+                                        onsubmit="return confirm('Attention: Personnel records deletion is permanent. Proceed?')">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger shadow-sm"
+                                            title="Terminate Contract"
+                                            style="border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="bi bi-trash3"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(staffList)}">
+                            <td colspan="5" class="text-center py-5">
+                                <i class="bi bi-person-badge text-muted fs-1 mb-3 d-block"></i>
+                                <h6 class="text-muted">No personnel records found in the roster.</h6>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

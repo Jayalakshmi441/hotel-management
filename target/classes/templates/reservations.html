@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservations | Grand Horizon Hotel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <i class="bi bi-buildings-fill"></i>
+            <span>Grand Horizon</span>
+        </div>
+        <nav class="nav flex-column">
+            <a class="nav-link" th:href="@{/dashboard}"><i class="bi bi-grid-fill"></i> Dashboard</a>
+            <a class="nav-link" th:href="@{/guests}"><i class="bi bi-people-fill"></i> Guests</a>
+            <a class="nav-link" th:href="@{/rooms}"><i class="bi bi-door-closed-fill"></i> Rooms</a>
+            <a class="nav-link active" th:href="@{/reservations}"><i class="bi bi-calendar-check-fill"></i>
+                Reservations</a>
+            <a class="nav-link" th:href="@{/reports}"><i class="bi bi-bar-chart-fill"></i> Reports</a>
+            <a class="nav-link" th:href="@{/staff}"><i class="bi bi-person-badge-fill"></i> Staff</a>
+        </nav>
+        <div style="position: absolute; bottom: 30px; width: calc(var(--sidebar-width) - 3rem);">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="nav-link border-0 bg-transparent w-100 text-danger">
+                    <i class="bi bi-box-arrow-right"></i> Sign Out
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <header class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h1 class="h2 fw-bold mb-1">Booking Management</h1>
+                <p class="text-muted mb-0">Overseeing luxury stays and distinguished reservations.</p>
+            </div>
+            <a th:href="@{/reservations/new}" class="btn btn-premium d-flex align-items-center gap-2">
+                <i class="bi bi-calendar-plus-fill"></i> New Booking
+            </a>
+        </header>
+
+        <div th:if="${success}" class="alert alert-success glass-card border-success text-success d-flex align-items-center gap-3 mb-4">
+            <i class="bi bi-check-circle-fill fs-4"></i>
+            <div th:text="${success}">Success message</div>
+        </div>
+
+        <div th:if="${errorMessage}" class="alert alert-danger glass-card border-danger text-danger d-flex align-items-center gap-3 mb-4">
+            <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+            <div th:text="${errorMessage}">Error message</div>
+        </div>
+
+        <div class="glass-card p-0 overflow-hidden shadow-premium">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light border-bottom">
+                        <tr>
+                            <th class="ps-4">Folio ID</th>
+                            <th>Guest Associate</th>
+                            <th>Accommodation</th>
+                            <th>Stay Schedule</th>
+                            <th>Total Amount</th>
+                            <th>Balance</th>
+                            <th>Current Status</th>
+                            <th class="text-end pe-4">Manage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="res : ${reservations}">
+                            <td class="ps-4">
+                                <span class="badge bg-light text-primary border border-primary-subtle"
+                                    style="font-family: monospace; font-size: 0.85rem;"
+                                    th:text="'#BK-' + ${res.reservationId}"></span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2" th:if="${res.guest != null}">
+                                    <div class="avatar-ui avatar-dark"
+                                        style="width: 32px; height: 32px; font-size: 0.9rem;">
+                                        <span th:text="${#strings.substring(res.guest.name, 0, 1)}">G</span>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-main" th:text="${res.guest.name}">Guest Name</div>
+                                        <div class="smaller text-muted" th:text="${res.guest.phone}">Phone</div>
+                                    </div>
+                                </div>
+                                <div th:unless="${res.guest != null}" class="text-muted smaller fst-italic">
+                                    <i class="bi bi-person-x me-1"></i> Guest Removed
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column" th:if="${res.room != null}">
+                                    <span class="fw-bold text-primary"
+                                        th:text="'Suite ' + ${res.room.roomNumber}">Room</span>
+                                    <span class="smaller text-muted fw-medium"
+                                        th:text="${res.room.roomType}">Type</span>
+                                </div>
+                                <div th:unless="${res.room != null}" class="text-muted smaller fst-italic">
+                                    <i class="bi bi-door-closed me-1"></i> Room Removed
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center gap-3 bg-light p-2 rounded-3 border border-glass"
+                                    style="max-width: fit-content;">
+                                    <div class="text-center">
+                                        <div class="smaller text-success fw-bold uppercase" style="font-size: 0.65rem;">
+                                            CHECK-IN</div>
+                                        <div class="small fw-medium" th:text="${res.checkInDate}">Date</div>
+                                    </div>
+                                    <i class="bi bi-arrow-right text-muted px-1"></i>
+                                    <div class="text-center">
+                                        <div class="smaller text-danger fw-bold uppercase" style="font-size: 0.65rem;">
+                                            CHECK-OUT</div>
+                                        <div class="small fw-medium" th:text="${res.checkOutDate}">Date</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="fw-bold text-main">
+                                <span
+                                    th:text="'₹' + ${#numbers.formatDecimal(res.safeTotalAmount, 1, 'COMMA', 0, 'POINT')}">Price</span>
+                            </td>
+                            <td class="fw-bold" th:classappend="${res.balance > 0 ? 'text-danger' : 'text-success'}">
+                                <span
+                                    th:text="${res.balance > 0 ? '₹' + #numbers.formatDecimal(res.balance, 1, 'COMMA', 0, 'POINT') : 'Paid'}">Balance</span>
+                            </td>
+                            <td>
+                                <span class="badge"
+                                    th:classappend="${res.bookingStatus.name() == 'CONFIRMED' ? 'bg-success' : (res.bookingStatus.name() == 'CANCELLED' ? 'bg-danger' : 'bg-warning')}"
+                                    th:text="${res.bookingStatus}">Status</span>
+                            </td>
+                            <td class="pe-4 text-end">
+                                <div class="d-flex justify-content-end align-items-center gap-2">
+                                    <a th:if="${res.bookingStatus.name() != 'CANCELLED'}"
+                                        th:href="@{'/reservations/edit/' + ${res.reservationId}}"
+                                        class="btn btn-sm btn-outline-primary"
+                                        style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 8px;"
+                                        title="Modify Reservation">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    
+                                    <form th:if="${res.bookingStatus.name() == 'CONFIRMED'}"
+                                        th:action="@{'/reservations/cancel/' + ${res.reservationId}}" 
+                                        method="post" 
+                                        style="margin: 0;"
+                                        onsubmit="return confirm('Attention: Proceed to cancel this reservation?')">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                            style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 8px;"
+                                            title="Cancel Booking">
+                                            <i class="bi bi-calendar-x"></i>
+                                        </button>
+                                    </form>
+
+                                    <span th:if="${res.bookingStatus.name() == 'CANCELLED'}" class="text-muted smaller">
+                                        <i class="bi bi-lock-fill"></i>
+                                    </span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(reservations)}">
+                            <td colspan="7" class="text-center py-5">
+                                <i class="bi bi-calendar-x text-muted fs-1 mb-3 d-block"></i>
+                                <h6 class="text-muted">No active reservations found in the portfolio.</h6>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
